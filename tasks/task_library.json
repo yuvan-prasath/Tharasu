@@ -1,0 +1,26 @@
+[
+  {
+    "id": "math_001",
+    "category": "math",
+    "question": "A train travels 120km in 2 hours. What is its speed in km/h?",
+    "reference_answer": "60"
+  },
+  {
+    "id": "math_002",
+    "category": "math",
+    "question": "What is 15% of 200?",
+    "reference_answer": "30"
+  },
+  {
+    "id": "reasoning_001",
+    "category": "reasoning",
+    "question": "If all roses are flowers and some flowers fade quickly, can we conclude that some roses fade quickly?",
+    "reference_answer": "No, we cannot conclude that with certainty"
+  },
+  {
+    "id": "coding_001",
+    "category": "coding",
+    "question": "Write a Python function that returns the factorial of a number n.",
+    "reference_answer": "def factorial(n): return 1 if n <= 1 else n * factorial(n-1)"
+  }
+]
