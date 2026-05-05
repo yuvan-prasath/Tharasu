@@ -1,26 +1,51 @@
 [
-  {
-    "id": "math_001",
-    "category": "math",
-    "question": "A train travels 120km in 2 hours. What is its speed in km/h?",
-    "reference_answer": "60"
-  },
-  {
-    "id": "math_002",
-    "category": "math",
-    "question": "What is 15% of 200?",
-    "reference_answer": "30"
-  },
-  {
-    "id": "reasoning_001",
-    "category": "reasoning",
-    "question": "If all roses are flowers and some flowers fade quickly, can we conclude that some roses fade quickly?",
-    "reference_answer": "No, we cannot conclude that with certainty"
-  },
-  {
-    "id": "coding_001",
-    "category": "coding",
-    "question": "Write a Python function that returns the factorial of a number n.",
-    "reference_answer": "def factorial(n): return 1 if n <= 1 else n * factorial(n-1)"
-  }
+    {
+        "id": "math_001",
+        "category": "math",
+        "question": "If a train travels 120km in 2 hours, what is its speed in km/h?",
+        "expected_answer": "60",
+        "reference_answer": "The speed of the train is 60 km/h. Speed equals distance divided by time, so 120 divided by 2 equals 60."
+    },
+    {
+        "id": "math_002",
+        "category": "math",
+        "question": "What is 15% of 200?",
+        "expected_answer": "30",
+        "reference_answer": "15% of 200 is 30. Multiply 200 by 0.15 to get 30."
+    },
+    {
+        "id": "math_003",
+        "category": "math",
+        "question": "A rectangle has length 8cm and width 5cm. What is its area?",
+        "expected_answer": "40",
+        "reference_answer": "The area of the rectangle is 40 square centimeters. Area equals length times width, so 8 times 5 equals 40."
+    },
+    {
+        "id": "reasoning_001",
+        "category": "reasoning",
+        "question": "If all roses are flowers and some flowers fade quickly, can we conclude that some roses fade quickly?",
+        "expected_answer": null,
+        "reference_answer": "No, we cannot conclude that some roses fade quickly. The statement says some flowers fade quickly but does not specify which flowers, so roses may or may not be among them."
+    },
+    {
+        "id": "reasoning_002",
+        "category": "reasoning",
+        "question": "A bat and a ball cost $1.10 together. The bat costs $1 more than the ball. How much does the ball cost?",
+        "expected_answer": "5",
+        "reference_answer": "The ball costs 5 cents. If the ball costs x, the bat costs x plus 1 dollar, and together they cost 1.10, so 2x plus 1 equals 1.10, giving x equals 0.05."
+    },
+    {
+        "id": "coding_001",
+        "category": "coding",
+        "question": "Write a Python function that returns the factorial of a number n using recursion.",
+        "expected_answer": null,
+        "reference_answer": "def factorial(n): return 1 if n <= 1 else n * factorial(n-1)"
+    },
+    {
+        "id": "coding_002",
+        "category": "coding",
+        "question": "Write a Python one-liner to reverse a string s.",
+        "expected_answer": "s[::-1]",
+        "reference_answer": "The answer is s[::-1] which uses Python slice notation to reverse the string."
+    }
 ]

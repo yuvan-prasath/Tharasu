@@ -13,4 +13,7 @@ MODELS = {
     "qwen3":       "groq/qwen/qwen3-32b",
 }
 
+JUDGE_MODEL="groq/llama-3.3-70b-versatile"
+SCORE_WEIGHTS = {"accuracy":0.35,"judge":0.30,"speed":0.15,"tokens":0.10,"bleu":0.10,}
+
 BENCHMARK_CATEGORIES = ["math", "coding", "reasoning"]

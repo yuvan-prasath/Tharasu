@@ -22,5 +22,11 @@ class BenchmarkResult(Base):
     status = Column(String)
     run_at = Column(DateTime,default=datetime.utcnow)
 
+    accuracy = Column(Float,nullable=True)
+    bleu_score = Column(Float,nullable=True )
+    judge_score = Column(Float,nullable=True)
+    judge_reason = Column(String,nullable=True)
+    consistency = Column(Float,nullable=True)
+    tharasu_score = Column(Float,nullable=True)
 def create_tables():
     Base.metadata.create_all(engine)

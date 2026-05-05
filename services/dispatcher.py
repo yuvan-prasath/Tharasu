@@ -3,7 +3,9 @@ import time
 import json
 from datetime import datetime
 from litellm import acompletion
-from config import MODELS
+from scoring.engine import calculate_accuracy,calculate_tharasu_score, calculate_bleu
+from scoring.judge import judge_answer
+from config import MODELS, JUDGE_MODEL
 from database.db import SessionLocal, BenchmarkResult
 
 async def ask_model(model_name:str,model_id:str,question:str):
@@ -25,10 +27,39 @@ async def run_benchmark_task(task : dict):
           for name,model_id in MODELS.items()
           ]
     results=await asyncio.gather(*jobs)
+    successful=[r for r in results if r["status"]=="success"]
+    all_latencies=[r["latency_ms"] for r in successful if r["latency_ms"]]
+    all_tokens=[r["tokens_used"] for r in successful if r["tokens_used"]]
+    judge_model_name=None
+    for name,model_id in MODELS.items():
+        if model_id==JUDGE_MODEL:
+            judge_model_name=name
+            break
+    enriched=[]
+    for r in results:
+        if r["status"]!="success" or not r["answer"]:
+            r["judge_score"]=None
+            r["judge_reason"]=None
+        elif r["model_name"]==judge_model_name:
+            r["judge_score"]=None
+            r["judge_reason"]="Self- Evaluation Skipped"
+        else:
+            verdict = await judge_answer(task["question"],r["answer"])
+            r["judge_score"]=verdict["score"]
+            r["judge_reason"]=verdict["reason"]
+        enriched.append(r)
+    expected = task.get("expected_answer")
+    reference = task.get("reference_answer")
+
+    for r in enriched:
+            r["accuracy"]=calculate_accuracy(r["answer"],expected) if expected else None
+            r["bleu_score"] = calculate_bleu(r["answer"], expected) if expected else None
+
+    for r in enriched:
+            r["tharasu_score"]= calculate_tharasu_score(accuracy=r["accuracy"],judge_score=r["judge_score"],latency_ms=r["latency_ms"],tokens_used=r["tokens_used"],bleu_score=r["bleu_score"],all_latencies=all_latencies,all_tokens=all_tokens)
 
     db = SessionLocal()
-    saved=[]
-    for r in results:
+    for r in enriched:
         record = BenchmarkResult(
             task_id = task["id"],
             category = task["category"],
@@ -38,10 +69,15 @@ async def run_benchmark_task(task : dict):
             latency_ms = r["latency_ms"],
             tokens_used = r["tokens_used"],
             status = r["status"],
-            run_at= datetime.utcnow()
+            run_at= datetime.utcnow(),
+            accuracy=r.get("accuracy"),
+            bleu_score=r.get("bleu_score"),
+            tharasu_score=r.get("tharasu_score"),
+            judge_score=r.get("judge_score"),
+            judge_reason=r.get("judge_reason"),
         )
         db.add(record)
-        saved.append(r)
+
     db.commit()
     db.close()
-    return saved
+    return enriched
