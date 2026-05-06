@@ -1,4 +1,4 @@
-
+from evolution.question_gen import run_evolution
 from fastapi import APIRouter
 from services.dispatcher import run_benchmark_task
 from database.db import SessionLocal, BenchmarkResult
@@ -91,3 +91,8 @@ def get_leaderboard():
         })
 
     return sorted(leaderboard, key=lambda x: x["avg_tharasu_score"] or 0, reverse=True)
+
+@router.get("/evolution/generate")
+async def evolution_generate():
+    results= await run_evolution()
+    return results

@@ -14,7 +14,6 @@ Return ONLY a valid JSON object with no extra text, no markdown, no explanation 
 Format: {{"score": <integer 1-10>, "reason": "<one sentence>"}}"""
 
 async def judge_answer(question:str,answer:str)->dict:
-
     if not answer:
         return {"Score" : 1.0, "reason":"No answer provided"}
     prompt = JUDGE_PROMPT.format(question=question,answer=answer[:1500])

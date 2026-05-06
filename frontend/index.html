@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>THARASU தராசு — The Scale of Minds</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #ffffff;
+      --gray-light: #f5f5f5;
+      --gray-mid: #e0e0e0;
+      --gray-text: #6b6b6b;
+      --accent-yellow: #f5c518;
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+      --accent-orange: #f97316;
+    }
+
+    body { background: #ffffff; color: #0a0a0a; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Navbar */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid #0a0a0a;
+    }
+
+    .nav-link {
+      cursor: pointer;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+      color: #6b6b6b;
+    }
+    .nav-link:hover { background: #f5f5f5; color: #0a0a0a; }
+    .nav-link.active {
+      background: #0a0a0a;
+      color: #ffffff;
+    }
+
+    /* Scale Logo SVG */
+    .logo-scale { width: 40px; height: 40px; }
+
+    /* Hero Section */
+    .hero-badge {
+      display: inline-block;
+      background: #0a0a0a;
+      color: #f5c518;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      padding: 6px 16px;
+      border-radius: 100px;
+      text-transform: uppercase;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+      background: #fff;
+      border: 2px solid #0a0a0a;
+      border-radius: 16px;
+      padding: 28px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 6px 6px 0px #0a0a0a;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+    .stat-card.yellow::before { background: #f5c518; }
+    .stat-card.blue::before { background: #3b82f6; }
+    .stat-card.green::before { background: #10b981; }
+    .stat-card.purple::before { background: #8b5cf6; }
+
+    /* Chart containers */
+    .chart-card {
+      background: #fff;
+      border: 2px solid #0a0a0a;
+      border-radius: 16px;
+      padding: 28px;
+    }
+
+    /* Section title */
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+    .section-sub {
+      font-size: 13px;
+      color: #6b6b6b;
+      margin-bottom: 24px;
+    }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table thead th {
+      background: #0a0a0a; color: #fff;
+      padding: 12px 16px; text-align: left;
+      font-weight: 600; font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    .data-table thead th:first-child { border-radius: 8px 0 0 0; }
+    .data-table thead th:last-child { border-radius: 0 8px 0 0; }
+    .data-table tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      vertical-align: top;
+    }
+    .data-table tbody tr:hover td { background: #fafafa; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+
+    /* Score pill */
+    .score-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .score-high { background: #d1fae5; color: #065f46; }
+    .score-mid  { background: #fef3c7; color: #92400e; }
+    .score-low  { background: #fee2e2; color: #991b1b; }
+
+    /* Status pill */
+    .status-success { background: #d1fae5; color: #065f46; }
+    .status-error   { background: #fee2e2; color: #991b1b; }
+
+    /* Task cards */
+    .task-card {
+      border: 2px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .task-card:hover { border-color: #0a0a0a; }
+
+    .model-response {
+      background: #f9f9f9;
+      border-left: 4px solid #0a0a0a;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+    .model-response.judge-winner { border-left-color: #f5c518; }
+
+    /* About cards */
+    .about-card {
+      border: 2px solid #0a0a0a;
+      border-radius: 16px;
+      padding: 28px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .about-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 4px 4px 0 #0a0a0a;
+    }
+
+    /* Metric badge */
+    .metric-badge {
+      display: inline-flex; align-items: center;
+      gap: 6px; padding: 6px 14px;
+      border: 1.5px solid #0a0a0a;
+      border-radius: 100px;
+      font-size: 12px; font-weight: 600;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f5f5f5; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+    /* Answer block */
+    .answer-block {
+      background: #fff;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12.5px;
+      color: #333;
+      max-height: 120px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    /* Leaderboard rank */
+    .rank-1 { background: #f5c518; color: #000; }
+    .rank-2 { background: #9ca3af; color: #fff; }
+    .rank-3 { background: #d97706; color: #fff; }
+    .rank-other { background: #f3f4f6; color: #374151; }
+
+    /* Evolution */
+    .evo-btn {
+      background: #0a0a0a; color: #fff;
+      border: none; padding: 12px 28px;
+      border-radius: 8px; font-size: 14px;
+      font-weight: 600; cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: opacity 0.2s;
+    }
+    .evo-btn:hover { opacity: 0.8; }
+    .evo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Run button */
+    .run-btn {
+      background: #f5c518; color: #000;
+      border: 2px solid #0a0a0a;
+      padding: 12px 32px;
+      border-radius: 8px; font-size: 14px;
+      font-weight: 700; cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.2s;
+    }
+    .run-btn:hover {
+      background: #0a0a0a; color: #f5c518;
+      box-shadow: 4px 4px 0 #f5c518;
+    }
+
+    /* Tab buttons */
+    .tab-btn {
+      padding: 8px 20px;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+      background: #fff; color: #6b6b6b;
+      font-family: 'Poppins', sans-serif;
+    }
+    .tab-btn.active {
+      border-color: #0a0a0a;
+      background: #0a0a0a; color: #fff;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid #e5e5e5;
+      border-top: 3px solid #0a0a0a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Fade in */
+    .fade-in {
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ NAVBAR ═══════════════════════════ -->
+<nav class="navbar px-6 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-3 cursor-pointer" onclick="navigate('home')">
+    <!-- Weighing Scale SVG Logo -->
+    <svg class="logo-scale" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="80" height="80" rx="12" fill="#0a0a0a"/>
+      <!-- Pole -->
+      <rect x="38" y="12" width="4" height="44" rx="2" fill="#f5c518"/>
+      <!-- Base -->
+      <rect x="24" y="54" width="32" height="5" rx="2.5" fill="#f5c518"/>
+      <rect x="33" y="59" width="14" height="8" rx="2" fill="#f5c518"/>
+      <!-- Beam -->
+      <rect x="10" y="24" width="60" height="4" rx="2" fill="#ffffff"/>
+      <!-- Left pan string -->
+      <line x1="18" y1="28" x2="14" y2="40" stroke="#ffffff" stroke-width="2"/>
+      <line x1="14" y1="40" x2="28" y2="40" stroke="#ffffff" stroke-width="2"/>
+      <line x1="28" y1="28" x2="28" y2="40" stroke="#ffffff" stroke-width="2"/>
+      <!-- Left pan -->
+      <ellipse cx="21" cy="41" rx="10" ry="3" fill="#f5c518" opacity="0.9"/>
+      <!-- Right pan string -->
+      <line x1="52" y1="28" x2="52" y2="40" stroke="#ffffff" stroke-width="2"/>
+      <line x1="52" y1="40" x2="66" y2="40" stroke="#ffffff" stroke-width="2"/>
+      <line x1="66" y1="28" x2="62" y2="40" stroke="#ffffff" stroke-width="2"/>
+      <!-- Right pan -->
+      <ellipse cx="59" cy="41" rx="10" ry="3" fill="#f5c518" opacity="0.9"/>
+      <!-- Center pin -->
+      <circle cx="40" cy="24" r="4" fill="#f5c518"/>
+    </svg>
+    <div>
+      <div style="font-size:18px; font-weight:800; line-height:1; letter-spacing:-0.5px;">THARASU</div>
+      <div style="font-size:10px; color:#888; letter-spacing:1.5px; font-weight:500;">தராசு · THE SCALE OF MINDS</div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-1">
+    <span class="nav-link active" onclick="navigate('home')" id="nav-home">Home</span>
+    <span class="nav-link" onclick="navigate('benchmark')" id="nav-benchmark">Benchmark</span>
+    <span class="nav-link" onclick="navigate('results')" id="nav-results">Results</span>
+    <span class="nav-link" onclick="navigate('leaderboard')" id="nav-leaderboard">Leaderboard</span>
+    <span class="nav-link" onclick="navigate('evolution')" id="nav-evolution">Evolution</span>
+    <span class="nav-link" onclick="navigate('about')" id="nav-about">About</span>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════ HOME PAGE ═══════════════════════════ -->
+<div id="page-home" class="page active fade-in">
+
+  <!-- Hero -->
+  <div style="background:#0a0a0a; padding: 80px 60px 70px; position:relative; overflow:hidden;">
+    <!-- Grid pattern -->
+    <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);background-size:40px 40px;"></div>
+
+    <div style="position:relative; max-width:800px;">
+      <div class="hero-badge" style="margin-bottom:24px;">⚖ Neumann Intelligence · 2025</div>
+      <h1 style="font-size:58px; font-weight:900; color:#fff; line-height:1.05; letter-spacing:-2px; margin-bottom:20px;">
+        The Scale<br/>
+        <span style="color:#f5c518;">of Minds.</span>
+      </h1>
+      <p style="font-size:17px; color:#aaa; max-width:520px; line-height:1.7; margin-bottom:36px;">
+        THARASU benchmarks multiple LLMs simultaneously — measuring accuracy, speed, reasoning quality, and consistency with a 7-metric evaluation framework.
+      </p>
+      <div class="flex gap-3 flex-wrap">
+        <button class="run-btn" onclick="navigate('benchmark')">Run Benchmark →</button>
+        <button onclick="navigate('leaderboard')" style="background:transparent;color:#fff;border:2px solid #444;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='#444'">View Leaderboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div style="background:#f5c518; padding:20px 60px; border-bottom:2px solid #0a0a0a;">
+    <div class="grid grid-cols-4 gap-6">
+      <div class="text-center">
+        <div style="font-size:28px;font-weight:900;" id="home-stat-runs">—</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:#333;">TOTAL RUNS</div>
+      </div>
+      <div class="text-center">
+        <div style="font-size:28px;font-weight:900;" id="home-stat-models">4</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:#333;">MODELS TESTED</div>
+      </div>
+      <div class="text-center">
+        <div style="font-size:28px;font-weight:900;" id="home-stat-top">—</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:#333;">TOP MODEL</div>
+      </div>
+      <div class="text-center">
+        <div style="font-size:28px;font-weight:900;" id="home-stat-score">—</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:#333;">BEST SCORE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overview Charts -->
+  <div style="padding:50px 60px;">
+    <div style="margin-bottom:8px;" class="section-title">Performance Overview</div>
+    <div class="section-sub">Live data from the latest benchmark run across all models</div>
+
+    <div class="grid grid-cols-2 gap-6 mb-8">
+      <div class="chart-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">THARASU Score</div>
+        <div style="font-size:12px;color:#888;margin-bottom:16px;">Composite weighted score (0–100)</div>
+        <canvas id="home-score-chart" height="180"></canvas>
+      </div>
+      <div class="chart-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Judge Score vs Latency</div>
+        <div style="font-size:12px;color:#888;margin-bottom:16px;">Quality vs Speed tradeoff</div>
+        <canvas id="home-scatter-chart" height="180"></canvas>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-6">
+      <div class="chart-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Avg Latency (ms)</div>
+        <div style="font-size:12px;color:#888;margin-bottom:16px;">Lower is better</div>
+        <canvas id="home-latency-chart" height="160"></canvas>
+      </div>
+      <div class="chart-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Accuracy %</div>
+        <div style="font-size:12px;color:#888;margin-bottom:16px;">For tasks with known answers</div>
+        <canvas id="home-accuracy-chart" height="160"></canvas>
+      </div>
+      <div class="chart-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">BLEU Score</div>
+        <div style="font-size:12px;color:#888;margin-bottom:16px;">Text similarity to reference (0–1)</div>
+        <canvas id="home-bleu-chart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model Cards -->
+  <div style="padding: 0 60px 60px;">
+    <div class="section-title" style="margin-bottom:4px;">Models Under Test</div>
+    <div class="section-sub">4 Groq models benchmarked simultaneously via LiteLLM</div>
+    <div class="grid grid-cols-4 gap-4" id="home-model-cards"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ BENCHMARK PAGE ═══════════════════════════ -->
+<div id="page-benchmark" class="page fade-in">
+  <div style="padding:50px 60px;">
+    <div class="section-title">Run Benchmark</div>
+    <div class="section-sub">Dispatch all tasks across all models and collect results</div>
+
+    <!-- Run Panel -->
+    <div style="border:2px solid #0a0a0a; border-radius:16px; padding:40px; max-width:640px; margin-bottom:40px;">
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:28px;">
+        <div style="width:48px;height:48px;background:#f5c518;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">⚡</div>
+        <div>
+          <div style="font-size:18px;font-weight:700;">Full Benchmark Run</div>
+          <div style="font-size:13px;color:#888;">Sends all tasks to all 4 models in parallel</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div style="background:#f9f9f9;border-radius:10px;padding:16px;">
+          <div style="font-size:12px;color:#888;font-weight:500;">Models</div>
+          <div style="font-size:20px;font-weight:800;">4</div>
+          <div style="font-size:11px;color:#aaa;">llama3_70b · llama3_8b<br/>llama4_scout · qwen3</div>
+        </div>
+        <div style="background:#f9f9f9;border-radius:10px;padding:16px;">
+          <div style="font-size:12px;color:#888;font-weight:500;">Metrics</div>
+          <div style="font-size:20px;font-weight:800;">7</div>
+          <div style="font-size:11px;color:#aaa;">Latency · Tokens · Accuracy<br/>BLEU · Judge · Consistency · THARASU</div>
+        </div>
+      </div>
+
+      <button class="run-btn" id="run-btn" onclick="runBenchmark()" style="width:100%;text-align:center;">
+        ⚡ Run Full Benchmark
+      </button>
+      <div id="run-status" style="margin-top:14px;font-size:13px;color:#888;min-height:20px;"></div>
+    </div>
+
+    <!-- Task Preview -->
+    <div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;">Task Library Preview</div>
+      <div style="font-size:13px;color:#888;margin-bottom:20px;">Tasks loaded from <code style="background:#f5f5f5;padding:2px 6px;border-radius:4px;">tasks/task_library.json</code></div>
+      <div id="task-preview-list">
+        <div style="color:#aaa;font-size:13px;">Click "Refresh Tasks" to preview</div>
+      </div>
+      <button onclick="loadTaskPreview()" style="margin-top:16px;background:#f5f5f5;border:2px solid #e5e5e5;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">
+        ↻ Refresh Tasks
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ RESULTS PAGE ═══════════════════════════ -->
+<div id="page-results" class="page fade-in">
+  <div style="padding:50px 60px;">
+    <div class="flex items-center justify-between mb-1">
+      <div class="section-title">Results</div>
+      <button onclick="loadResults()" style="background:#f5f5f5;border:2px solid #e5e5e5;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">↻ Refresh</button>
+    </div>
+    <div class="section-sub">Full task-by-task view — questions, answers, scores, judge reasoning</div>
+
+    <!-- Filter tabs -->
+    <div class="flex gap-2 mb-6" id="category-tabs">
+      <button class="tab-btn active" onclick="filterResults('all', this)">All</button>
+      <button class="tab-btn" onclick="filterResults('math', this)">Math</button>
+      <button class="tab-btn" onclick="filterResults('coding', this)">Coding</button>
+      <button class="tab-btn" onclick="filterResults('reasoning', this)">Reasoning</button>
+    </div>
+
+    <!-- Results grouped by task -->
+    <div id="results-container">
+      <div style="color:#aaa;font-size:13px;padding:40px 0;text-align:center;">Loading results...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ LEADERBOARD PAGE ═══════════════════════════ -->
+<div id="page-leaderboard" class="page fade-in">
+  <div style="padding:50px 60px;">
+    <div class="flex items-center justify-between mb-1">
+      <div class="section-title">Leaderboard</div>
+      <button onclick="loadLeaderboard()" style="background:#f5f5f5;border:2px solid #e5e5e5;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">↻ Refresh</button>
+    </div>
+    <div class="section-sub">Models ranked by average THARASU Score across all benchmark runs</div>
+
+    <!-- Podium -->
+    <div id="podium-section" class="mb-10"></div>
+
+    <!-- Full Table -->
+    <div class="chart-card mb-8">
+      <div style="font-size:15px;font-weight:700;margin-bottom:16px;">Full Rankings Table</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Model</th>
+              <th>THARASU Score</th>
+              <th>Judge Score</th>
+              <th>Accuracy %</th>
+              <th>Avg Latency</th>
+              <th>Avg Tokens</th>
+              <th>BLEU</th>
+              <th>Tasks</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <tr><td colspan="9" style="text-align:center;color:#aaa;padding:30px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Comparison Charts -->
+    <div class="grid grid-cols-2 gap-6">
+      <div class="chart-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Radar — All Metrics</div>
+        <div style="font-size:12px;color:#888;margin-bottom:16px;">Multi-axis model profile comparison</div>
+        <canvas id="lb-radar-chart" height="260"></canvas>
+      </div>
+      <div class="chart-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Score Breakdown</div>
+        <div style="font-size:12px;color:#888;margin-bottom:16px;">Judge · Accuracy · BLEU side by side</div>
+        <canvas id="lb-grouped-chart" height="260"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ EVOLUTION PAGE ═══════════════════════════ -->
+<div id="page-evolution" class="page fade-in">
+  <div style="padding:50px 60px;">
+    <div class="section-title">Evolution Agent</div>
+    <div class="section-sub">Auto-generates harder questions for categories where all models struggle</div>
+
+    <!-- Explain Card -->
+    <div style="background:#0a0a0a;color:#fff;border-radius:16px;padding:36px;max-width:700px;margin-bottom:40px;">
+      <div style="font-size:32px;margin-bottom:12px;">🧬</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:10px;">How Evolution Works</div>
+      <div style="font-size:13px;color:#aaa;line-height:1.8;">
+        1. Scans the database for tasks where <strong style="color:#f5c518;">all models scored below 5</strong> on the judge scale<br/>
+        2. Groups failed tasks by category (math / coding / reasoning)<br/>
+        3. Calls <strong style="color:#f5c518;">llama3_70b as a question designer</strong> to generate 5 harder questions per category<br/>
+        4. Appends new questions to <code style="color:#f5c518;">task_library.json</code> — THARASU grows smarter over time
+      </div>
+    </div>
+
+    <!-- Trigger -->
+    <div style="border:2px solid #0a0a0a;border-radius:16px;padding:32px;max-width:480px;margin-bottom:40px;">
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Run the Agent</div>
+      <div style="font-size:13px;color:#888;margin-bottom:20px;">This will query your DB and generate new benchmark questions.</div>
+      <button class="evo-btn" id="evo-run-btn" onclick="runEvolution()">
+        ⚡ Run Evolution Agent
+      </button>
+      <div id="evo-status" style="margin-top:14px;font-size:13px;color:#888;min-height:20px;"></div>
+    </div>
+
+    <!-- Evolution result -->
+    <div id="evo-result-section" style="display:none;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:16px;">Evolution Report</div>
+      <div id="evo-result-cards" class="grid grid-cols-3 gap-4"></div>
+    </div>
+
+    <!-- Why Threshold -->
+    <div style="background:#fffbeb;border:2px solid #f5c518;border-radius:12px;padding:24px;max-width:640px;margin-top:30px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px;">💡 Why "below 5"?</div>
+      <div style="font-size:13px;color:#555;line-height:1.7;">
+        The judge scores on a 1–10 scale. Score ≥5 means the model handled the task adequately. 
+        Below 5 is a genuine failure. The agent only evolves categories where 
+        <strong>every model failed</strong> — signaling a universal blind spot in the task library, 
+        not just a single weak model.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ ABOUT PAGE ═══════════════════════════ -->
+<div id="page-about" class="page fade-in">
+
+  <!-- About Hero -->
+  <div style="background:#0a0a0a;padding:60px;color:#fff;">
+    <div style="max-width:700px;">
+      <div style="font-size:13px;color:#888;letter-spacing:2px;font-weight:500;margin-bottom:12px;">ABOUT THE PROJECT</div>
+      <h2 style="font-size:42px;font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;">
+        Built to measure.<br/><span style="color:#f5c518;">Built to evolve.</span>
+      </h2>
+      <p style="color:#aaa;font-size:15px;line-height:1.8;">
+        THARASU (தராசு) means "weighing scale" in Tamil. This project was built by Yuvan under Neumann Intelligence — a solo AI venture building AI-as-a-Service products for Indian SMBs.
+      </p>
+    </div>
+  </div>
+
+  <div style="padding:50px 60px;">
+    <!-- Metrics -->
+    <div class="section-title" style="margin-bottom:4px;">The 7 Metrics</div>
+    <div class="section-sub">Every model response is graded across 7 dimensions</div>
+
+    <div class="grid grid-cols-2 gap-4 mb-12">
+      <div class="about-card">
+        <div style="font-size:22px;margin-bottom:10px;">⏱</div>
+        <div style="font-weight:700;margin-bottom:4px;">1. Latency</div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px;">Time from API call to response, in milliseconds. Lower is better.</div>
+        <code style="font-size:11px;background:#f5f5f5;padding:6px 10px;border-radius:6px;display:block;">latency_ms = (time.time() - start) * 1000</code>
+      </div>
+      <div class="about-card">
+        <div style="font-size:22px;margin-bottom:10px;">🔢</div>
+        <div style="font-weight:700;margin-bottom:4px;">2. Token Count</div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px;">Total tokens consumed per response. Tracks efficiency across models.</div>
+        <code style="font-size:11px;background:#f5f5f5;padding:6px 10px;border-radius:6px;display:block;">response.usage.total_tokens</code>
+      </div>
+      <div class="about-card">
+        <div style="font-size:22px;margin-bottom:10px;">✅</div>
+        <div style="font-weight:700;margin-bottom:4px;">3. Accuracy</div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px;">For tasks with a known answer. String match with numeric fallback. Returns 100 or 0.</div>
+        <code style="font-size:11px;background:#f5f5f5;padding:6px 10px;border-radius:6px;display:block;">expected_answer in model_response</code>
+      </div>
+      <div class="about-card">
+        <div style="font-size:22px;margin-bottom:10px;">📊</div>
+        <div style="font-weight:700;margin-bottom:4px;">4. BLEU Score</div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px;">Text similarity between model output and reference answer. Range 0–1 via NLTK.</div>
+        <code style="font-size:11px;background:#f5f5f5;padding:6px 10px;border-radius:6px;display:block;">sentence_bleu([ref.split()], ans.split())</code>
+      </div>
+      <div class="about-card">
+        <div style="font-size:22px;margin-bottom:10px;">⚖️</div>
+        <div style="font-weight:700;margin-bottom:4px;">5. LLM Judge Score</div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px;">llama3_70b scores other models' answers 1–10. Self-evaluation skipped.</div>
+        <code style="font-size:11px;background:#f5f5f5;padding:6px 10px;border-radius:6px;display:block;">{{"score": 1–10, "reason": "..."}}</code>
+      </div>
+      <div class="about-card">
+        <div style="font-size:22px;margin-bottom:10px;">🔄</div>
+        <div style="font-weight:700;margin-bottom:4px;">6. Consistency</div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px;">Run each task 3× and compare judge scores. High variance = unreliable model.</div>
+        <code style="font-size:11px;background:#f5f5f5;padding:6px 10px;border-radius:6px;display:block;">1 - (std_dev / mean) of 3 runs</code>
+      </div>
+    </div>
+
+    <!-- THARASU Score Formula -->
+    <div style="background:#0a0a0a;color:#fff;border-radius:16px;padding:36px;margin-bottom:50px;">
+      <div style="font-size:22px;margin-bottom:10px;">7. THARASU Score</div>
+      <div style="font-size:13px;color:#aaa;margin-bottom:20px;">Composite weighted formula — the signature metric of this framework</div>
+      <div style="background:#1a1a1a;border-radius:10px;padding:20px;font-family:monospace;font-size:14px;color:#f5c518;line-height:1.8;">
+        tharasu = (accuracy × 0.35)<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (judge × 0.30)<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (speed × 0.15)<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (token_efficiency × 0.10)<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (bleu × 0.10)
+      </div>
+      <div style="font-size:12px;color:#888;margin-top:14px;">All inputs normalized to 0–100. Speed and token efficiency are inverted (lower = higher score).</div>
+    </div>
+
+    <!-- Stack -->
+    <div class="section-title" style="margin-bottom:4px;">The Free Stack</div>
+    <div class="section-sub">Total build cost: ₹0 — every tool is permanently free</div>
+
+    <div class="grid grid-cols-4 gap-4 mb-12">
+      <div style="background:#f9f9f9;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:8px;">⚡</div>
+        <div style="font-weight:700;font-size:13px;">Groq API</div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">4 benchmark models + judge</div>
+        <div style="font-size:10px;color:#10b981;font-weight:600;margin-top:6px;">FREE FOREVER</div>
+      </div>
+      <div style="background:#f9f9f9;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:8px;">🔗</div>
+        <div style="font-weight:700;font-size:13px;">LiteLLM</div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">Universal API wrapper</div>
+        <div style="font-size:10px;color:#10b981;font-weight:600;margin-top:6px;">OPEN SOURCE</div>
+      </div>
+      <div style="background:#f9f9f9;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:8px;">🚀</div>
+        <div style="font-weight:700;font-size:13px;">FastAPI</div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">REST API backend</div>
+        <div style="font-size:10px;color:#10b981;font-weight:600;margin-top:6px;">OPEN SOURCE</div>
+      </div>
+      <div style="background:#f9f9f9;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:8px;">🗃</div>
+        <div style="font-weight:700;font-size:13px;">SQLite</div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">Result storage</div>
+        <div style="font-size:10px;color:#10b981;font-weight:600;margin-top:6px;">OPEN SOURCE</div>
+      </div>
+    </div>
+
+    <!-- Models -->
+    <div class="section-title" style="margin-bottom:4px;">Models Benchmarked</div>
+    <div class="section-sub">4 Groq-hosted models tested simultaneously</div>
+    <div style="overflow-x:auto;">
+      <table class="data-table" style="max-width:700px;">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Model ID</th>
+            <th>Avg Latency</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>llama3_70b</strong></td>
+            <td><code style="font-size:11px;background:#f5f5f5;padding:2px 6px;border-radius:4px;">groq/llama-3.3-70b-versatile</code></td>
+            <td>300–1000ms</td>
+            <td><span class="score-pill score-high">Benchmark + Judge</span></td>
+          </tr>
+          <tr>
+            <td><strong>llama3_8b</strong></td>
+            <td><code style="font-size:11px;background:#f5f5f5;padding:2px 6px;border-radius:4px;">groq/llama-3.1-8b-instant</code></td>
+            <td>200–500ms</td>
+            <td><span class="score-pill score-mid">Benchmark</span></td>
+          </tr>
+          <tr>
+            <td><strong>llama4_scout</strong></td>
+            <td><code style="font-size:11px;background:#f5f5f5;padding:2px 6px;border-radius:4px;">groq/meta-llama/llama-4-scout-17b</code></td>
+            <td>500–1300ms</td>
+            <td><span class="score-pill score-mid">Benchmark</span></td>
+          </tr>
+          <tr>
+            <td><strong>qwen3</strong></td>
+            <td><code style="font-size:11px;background:#f5f5f5;padding:2px 6px;border-radius:4px;">groq/qwen/qwen3-32b</code></td>
+            <td>1000–1900ms</td>
+            <td><span class="score-pill score-mid">Benchmark</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Built by -->
+    <div style="margin-top:60px;padding-top:40px;border-top:2px solid #f0f0f0;display:flex;align-items:center;gap:20px;">
+      <div style="width:56px;height:56px;background:#0a0a0a;border-radius:14px;display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 80 80" width="36" height="36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="38" y="12" width="4" height="44" rx="2" fill="#f5c518"/>
+          <rect x="24" y="54" width="32" height="5" rx="2.5" fill="#f5c518"/>
+          <rect x="33" y="59" width="14" height="8" rx="2" fill="#f5c518"/>
+          <rect x="10" y="24" width="60" height="4" rx="2" fill="#ffffff"/>
+          <line x1="18" y1="28" x2="14" y2="40" stroke="#ffffff" stroke-width="2"/>
+          <line x1="14" y1="40" x2="28" y2="40" stroke="#ffffff" stroke-width="2"/>
+          <line x1="28" y1="28" x2="28" y2="40" stroke="#ffffff" stroke-width="2"/>
+          <ellipse cx="21" cy="41" rx="10" ry="3" fill="#f5c518" opacity="0.9"/>
+          <line x1="52" y1="28" x2="52" y2="40" stroke="#ffffff" stroke-width="2"/>
+          <line x1="52" y1="40" x2="66" y2="40" stroke="#ffffff" stroke-width="2"/>
+          <line x1="66" y1="28" x2="62" y2="40" stroke="#ffffff" stroke-width="2"/>
+          <ellipse cx="59" cy="41" rx="10" ry="3" fill="#f5c518" opacity="0.9"/>
+          <circle cx="40" cy="24" r="4" fill="#f5c518"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-weight:800;font-size:16px;">Yuvan · Neumann Intelligence</div>
+        <div style="font-size:13px;color:#888;">AI Engineer · Bangalore · BCA 2026</div>
+        <div style="font-size:12px;color:#aaa;margin-top:2px;">github.com/yuvan-prasath/Tharasu · huggingface.co/spaces/yuvan-prasath-b/tharasu</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SCRIPTS ═══════════════════════════ -->
+<script>
+/* ─── State ─────────────────────────────── */
+let allResults = [];
+let leaderboardData = [];
+let homeScoreChart, homeScatterChart, homeLatencyChart, homeAccuracyChart, homeBleuChart;
+let lbRadarChart, lbGroupedChart;
+const CHART_COLORS = ['#f5c518','#3b82f6','#10b981','#8b5cf6'];
+
+/* ─── Navigation ─────────────────────────────── */
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-' + page).classList.add('active');
+
+  if (page === 'home') { loadHomeData(); }
+  if (page === 'results') { loadResults(); }
+  if (page === 'leaderboard') { loadLeaderboard(); }
+  if (page === 'benchmark') { loadTaskPreview(); }
+}
+
+/* ─── Helpers ─────────────────────────────── */
+function scoreClass(score) {
+  if (score === null || score === undefined) return '';
+  if (score >= 7) return 'score-high';
+  if (score >= 4) return 'score-mid';
+  return 'score-low';
+}
+
+function fmtScore(v, decimals=1) {
+  return (v !== null && v !== undefined) ? Number(v).toFixed(decimals) : '—';
+}
+
+function destroyChart(ref) { if (ref) ref.destroy(); return null; }
+
+function barOptions(minY, maxY, horizontal=false) {
+  return {
+    indexAxis: horizontal ? 'y' : 'x',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { min: horizontal ? minY : undefined, max: horizontal ? maxY : undefined, ticks: { color:'#888', font:{family:'Poppins',size:11} }, grid: { color:'#f0f0f0' } },
+      y: { min: !horizontal ? minY : undefined, max: !horizontal ? maxY : undefined, ticks: { color:'#555', font:{family:'Poppins',size:11} }, grid: { color:'#f0f0f0' } }
+    }
+  };
+}
+
+/* ─── HOME ─────────────────────────────── */
+async function loadHomeData() {
+  try {
+    const res = await fetch('/benchmark/leaderboard');
+    leaderboardData = await res.json();
+
+    const models = leaderboardData.map(m => m.model);
+    const scores = leaderboardData.map(m => m.avg_tharasu_score ?? 0);
+    const latencies = leaderboardData.map(m => m.avg_latency_ms ?? 0);
+    const accuracies = leaderboardData.map(m => m.avg_accuracy ?? 0);
+    const bleus = leaderboardData.map(m => (m.avg_bleu ?? 0) * 100);
+    const judges = leaderboardData.map(m => m.avg_judge_score ?? 0);
+
+    // Stats
+    const totalRuns = leaderboardData.reduce((s,m) => s + (m.tasks_completed||0), 0);
+    document.getElementById('home-stat-runs').textContent = totalRuns;
+    if (leaderboardData.length > 0) {
+      document.getElementById('home-stat-top').textContent = leaderboardData[0].model;
+      document.getElementById('home-stat-score').textContent = fmtScore(leaderboardData[0].avg_tharasu_score);
+    }
+
+    // THARASU Score Chart
+    homeScoreChart = destroyChart(homeScoreChart);
+    homeScoreChart = new Chart(document.getElementById('home-score-chart').getContext('2d'), {
+      type: 'bar',
+      data: { labels: models, datasets: [{ data: scores, backgroundColor: CHART_COLORS, borderRadius: 6 }] },
+      options: { ...barOptions(0, 100, true), plugins: { legend: { display: false } } }
+    });
+
+    // Scatter Chart (Judge vs Latency)
+    homeScatterChart = destroyChart(homeScatterChart);
+    homeScatterChart = new Chart(document.getElementById('home-scatter-chart').getContext('2d'), {
+      type: 'scatter',
+      data: {
+        datasets: leaderboardData.map((m, i) => ({
+          label: m.model,
+          data: [{ x: m.avg_latency_ms ?? 0, y: m.avg_judge_score ?? 0 }],
+          backgroundColor: CHART_COLORS[i],
+          pointRadius: 10,
+          pointHoverRadius: 14
+        }))
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#555', font: { family: 'Poppins', size: 11 } } } },
+        scales: {
+          x: { title: { display:true, text:'Latency (ms)', color:'#888', font:{family:'Poppins',size:11} }, ticks:{color:'#888',font:{family:'Poppins',size:11}}, grid:{color:'#f0f0f0'} },
+          y: { min:0, max:10, title: { display:true, text:'Judge Score', color:'#888', font:{family:'Poppins',size:11} }, ticks:{color:'#888',font:{family:'Poppins',size:11}}, grid:{color:'#f0f0f0'} }
+        }
+      }
+    });
+
+    // Latency
+    homeLatencyChart = destroyChart(homeLatencyChart);
+    homeLatencyChart = new Chart(document.getElementById('home-latency-chart').getContext('2d'), {
+      type: 'bar',
+      data: { labels: models, datasets: [{ data: latencies, backgroundColor: '#ef4444', borderRadius:5 }] },
+      options: barOptions(0, null, false)
+    });
+
+    // Accuracy
+    homeAccuracyChart = destroyChart(homeAccuracyChart);
+    homeAccuracyChart = new Chart(document.getElementById('home-accuracy-chart').getContext('2d'), {
+      type: 'bar',
+      data: { labels: models, datasets: [{ data: accuracies, backgroundColor: '#10b981', borderRadius:5 }] },
+      options: barOptions(0, 100, false)
+    });
+
+    // BLEU
+    homeBleuChart = destroyChart(homeBleuChart);
+    homeBleuChart = new Chart(document.getElementById('home-bleu-chart').getContext('2d'), {
+      type: 'bar',
+      data: { labels: models, datasets: [{ data: bleus, backgroundColor: '#8b5cf6', borderRadius:5 }] },
+      options: barOptions(0, 100, false)
+    });
+
+    // Model Cards
+    const grid = document.getElementById('home-model-cards');
+    grid.innerHTML = leaderboardData.map((m, i) => `
+      <div class="stat-card ${['yellow','blue','green','purple'][i]}">
+        <div style="font-size:11px;color:#888;font-weight:600;letter-spacing:1px;margin-bottom:8px;">#${i+1} MODEL</div>
+        <div style="font-size:15px;font-weight:800;margin-bottom:16px;">${m.model}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:#888;">THARASU</span><strong>${fmtScore(m.avg_tharasu_score)}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:#888;">Judge</span><strong>${fmtScore(m.avg_judge_score)}/10</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:#888;">Latency</span><strong>${fmtScore(m.avg_latency_ms,0)}ms</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:#888;">Accuracy</span><strong>${fmtScore(m.avg_accuracy)}%</strong>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+  } catch(e) {
+    console.error('Home load error:', e);
+  }
+}
+
+/* ─── BENCHMARK ─────────────────────────────── */
+async function runBenchmark() {
+  const btn = document.getElementById('run-btn');
+  const status = document.getElementById('run-status');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Running...';
+  status.innerHTML = 'Dispatching tasks to all 4 models in parallel...';
+  try {
+    const res = await fetch('/benchmark/run', { method: 'POST' });
+    const data = await res.json();
+    status.innerHTML = `✅ ${data.message || 'Benchmark complete!'}`;
+    btn.innerHTML = '✅ Done! Run Again';
+  } catch(e) {
+    status.innerHTML = '❌ Error: ' + e.message;
+    btn.innerHTML = '⚡ Run Full Benchmark';
+  }
+  btn.disabled = false;
+}
+
+async function loadTaskPreview() {
+  const container = document.getElementById('task-preview-list');
+  container.innerHTML = '<div style="color:#aaa;font-size:13px;">Loading...</div>';
+  try {
+    const res = await fetch('/benchmark/results');
+    const data = await res.json();
+    // Get unique tasks
+    const seen = new Set();
+    const tasks = data.filter(r => { if(seen.has(r.task_id)) return false; seen.add(r.task_id); return true; });
+
+    if (!tasks.length) {
+      container.innerHTML = '<div style="color:#aaa;font-size:13px;">No tasks found. Run a benchmark first.</div>';
+      return;
+    }
+    container.innerHTML = tasks.slice(0,10).map(t => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid #e5e5e5;border-radius:10px;margin-bottom:8px;">
+        <span style="background:#0a0a0a;color:#fff;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">${t.category || '—'}</span>
+        <span style="font-size:13px;color:#333;flex:1;">${t.task_id}</span>
+        <span style="font-size:12px;color:#aaa;">${t.model || ''}</span>
+      </div>
+    `).join('');
+  } catch(e) {
+    container.innerHTML = '<div style="color:#aaa;font-size:13px;">Could not load tasks.</div>';
+  }
+}
+
+/* ─── RESULTS ─────────────────────────────── */
+let currentFilter = 'all';
+
+async function loadResults() {
+  const container = document.getElementById('results-container');
+  container.innerHTML = '<div style="color:#aaa;font-size:13px;padding:40px 0;text-align:center;"><span class="spinner"></span>Loading results...</div>';
+  try {
+    const res = await fetch('/benchmark/results');
+    allResults = await res.json();
+    renderResults(currentFilter);
+  } catch(e) {
+    container.innerHTML = '<div style="color:#e44;font-size:13px;padding:20px;">Error loading results.</div>';
+  }
+}
+
+function filterResults(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderResults(cat);
+}
+
+function renderResults(cat) {
+  const container = document.getElementById('results-container');
+  const filtered = cat === 'all' ? allResults : allResults.filter(r => r.category === cat);
+
+  if (!filtered.length) {
+    container.innerHTML = '<div style="color:#aaa;font-size:13px;padding:40px 0;text-align:center;">No results found. Run a benchmark first.</div>';
+    return;
+  }
+
+  // Group by task_id
+  const byTask = {};
+  for (const r of filtered) {
+    if (!byTask[r.task_id]) byTask[r.task_id] = { task_id: r.task_id, category: r.category, question: r.question, responses: [] };
+    byTask[r.task_id].responses.push(r);
+  }
+
+  container.innerHTML = Object.values(byTask).map(task => {
+    const bestJudge = Math.max(...task.responses.map(r => r.judge_score || 0));
+
+    const responses = task.responses.map(r => {
+      const isWinner = r.judge_score === bestJudge && r.judge_score > 0;
+      return `
+        <div class="model-response ${isWinner ? 'judge-winner' : ''}">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap-8px;gap:8px;">
+              ${isWinner ? '<span style="font-size:14px;">🏆</span>' : ''}
+              <strong style="font-size:13px;">${r.model}</strong>
+              <span class="score-pill ${r.status === 'success' ? 'status-success' : 'status-error'}" style="font-size:10px;">${r.status}</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="metric-badge" style="font-size:11px;">⏱ ${r.latency_ms ? fmtScore(r.latency_ms,0)+'ms' : '—'}</span>
+              <span class="metric-badge" style="font-size:11px;">🔢 ${r.tokens_used ? r.tokens_used+' tok' : '—'}</span>
+              ${r.judge_score !== null && r.judge_score !== undefined ? `<span class="score-pill ${scoreClass(r.judge_score)}" style="font-size:11px;">Judge: ${fmtScore(r.judge_score)}/10</span>` : ''}
+              ${r.accuracy !== null && r.accuracy !== undefined ? `<span class="score-pill ${r.accuracy >= 100 ? 'score-high' : 'score-low'}" style="font-size:11px;">Acc: ${fmtScore(r.accuracy,0)}%</span>` : ''}
+              ${r.bleu_score !== null && r.bleu_score !== undefined ? `<span class="score-pill score-mid" style="font-size:11px;">BLEU: ${fmtScore(r.bleu_score,3)}</span>` : ''}
+              ${r.tharasu_score !== null && r.tharasu_score !== undefined ? `<span class="score-pill score-high" style="font-size:11px;background:#e0e7ff;color:#3730a3;">⚖ ${fmtScore(r.tharasu_score)}</span>` : ''}
+            </div>
+          </div>
+
+          ${r.answer ? `
+            <div style="margin-bottom:8px;">
+              <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">MODEL ANSWER</div>
+              <div class="answer-block">${r.answer}</div>
+            </div>
+          ` : ''}
+
+          ${r.judge_reason ? `
+            <div style="font-size:11px;color:#888;font-weight:600;margin-top:8px;margin-bottom:3px;">JUDGE REASONING</div>
+            <div style="font-size:12px;color:#555;font-style:italic;line-height:1.5;">"${r.judge_reason}"</div>
+          ` : r.model_name === 'llama3_70b' ? '<div style="font-size:11px;color:#aaa;font-style:italic;">Self-evaluation skipped (judge model)</div>' : ''}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="task-card fade-in">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:#0a0a0a;color:#fff;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:0.5px;">${task.category?.toUpperCase() || 'TASK'}</span>
+              <span style="font-size:11px;color:#aaa;font-weight:600;">${task.task_id}</span>
+            </div>
+            <div style="font-size:15px;font-weight:600;color:#0a0a0a;line-height:1.5;">${task.question}</div>
+          </div>
+          <span style="font-size:12px;color:#888;">${task.responses.length} responses</span>
+        </div>
+        ${responses}
+      </div>
+    `;
+  }).join('');
+}
+
+/* ─── LEADERBOARD ─────────────────────────────── */
+async function loadLeaderboard() {
+  try {
+    const res = await fetch('/benchmark/leaderboard');
+    leaderboardData = await res.json();
+    renderLeaderboard();
+  } catch(e) {
+    console.error('Leaderboard error:', e);
+  }
+}
+
+function renderLeaderboard() {
+  const data = leaderboardData;
+  if (!data.length) return;
+
+  // Podium
+  const podiumEl = document.getElementById('podium-section');
+  const medals = ['🥇','🥈','🥉'];
+  const rankColors = ['rank-1','rank-2','rank-3'];
+  podiumEl.innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;">
+      ${data.slice(0,3).map((m,i) => `
+        <div style="flex:1;min-width:180px;border:2px solid #0a0a0a;border-radius:16px;padding:24px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${['#f5c518','#9ca3af','#d97706'][i]};"></div>
+          <div style="font-size:28px;margin-bottom:8px;">${medals[i]}</div>
+          <div style="font-weight:800;font-size:16px;margin-bottom:4px;">${m.model}</div>
+          <div style="font-size:28px;font-weight:900;color:${['#f5c518','#6b7280','#d97706'][i]};">${fmtScore(m.avg_tharasu_score)}</div>
+          <div style="font-size:11px;color:#888;font-weight:600;">THARASU SCORE</div>
+          <div style="margin-top:12px;font-size:12px;color:#666;">
+            Judge: ${fmtScore(m.avg_judge_score)}/10 &nbsp;·&nbsp; ${fmtScore(m.avg_latency_ms,0)}ms
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // Table
+  const tbody = document.getElementById('leaderboard-body');
+  tbody.innerHTML = data.map((m,i) => `
+    <tr>
+      <td>
+        <span class="score-pill ${i < 3 ? rankColors[i] : 'rank-other'}">#${i+1}</span>
+      </td>
+      <td><strong>${m.model}</strong></td>
+      <td><span class="score-pill ${scoreClass(m.avg_tharasu_score ? m.avg_tharasu_score/10 : null)}">${fmtScore(m.avg_tharasu_score)}</span></td>
+      <td>${fmtScore(m.avg_judge_score)}/10</td>
+      <td>${fmtScore(m.avg_accuracy)}%</td>
+      <td>${fmtScore(m.avg_latency_ms,0)} ms</td>
+      <td>${fmtScore(m.avg_tokens,0)}</td>
+      <td>${fmtScore(m.avg_bleu, 4)}</td>
+      <td>${m.tasks_completed}</td>
+    </tr>
+  `).join('');
+
+  // Radar
+  lbRadarChart = destroyChart(lbRadarChart);
+  lbRadarChart = new Chart(document.getElementById('lb-radar-chart').getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: ['THARASU', 'Judge×10', 'Accuracy', 'BLEU×100', 'Speed'],
+      datasets: data.map((m,i) => ({
+        label: m.model,
+        data: [
+          m.avg_tharasu_score ?? 0,
+          (m.avg_judge_score ?? 0) * 10,
+          m.avg_accuracy ?? 0,
+          (m.avg_bleu ?? 0) * 100,
+          m.avg_latency_ms ? Math.max(0, 100 - m.avg_latency_ms/20) : 50
+        ],
+        backgroundColor: CHART_COLORS[i] + '22',
+        borderColor: CHART_COLORS[i],
+        pointBackgroundColor: CHART_COLORS[i],
+        borderWidth: 2,
+        pointRadius: 4
+      }))
+    },
+    options: {
+      scales: {
+        r: {
+          min:0, max:100,
+          ticks: { color:'#888', backdropColor:'transparent', font:{family:'Poppins',size:10} },
+          grid: { color:'#e5e5e5' },
+          pointLabels: { color:'#333', font:{family:'Poppins',size:12,weight:'600'} }
+        }
+      },
+      plugins: { legend: { labels: { color:'#333', font:{family:'Poppins',size:11} } } }
+    }
+  });
+
+  // Grouped Bar
+  lbGroupedChart = destroyChart(lbGroupedChart);
+  lbGroupedChart = new Chart(document.getElementById('lb-grouped-chart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: data.map(m => m.model),
+      datasets: [
+        { label: 'Judge Score ×10', data: data.map(m => (m.avg_judge_score??0)*10), backgroundColor: '#3b82f6', borderRadius:4 },
+        { label: 'Accuracy %', data: data.map(m => m.avg_accuracy??0), backgroundColor: '#10b981', borderRadius:4 },
+        { label: 'BLEU ×100', data: data.map(m => (m.avg_bleu??0)*100), backgroundColor: '#8b5cf6', borderRadius:4 },
+      ]
+    },
+    options: {
+      responsive:true,
+      scales: {
+        x: { ticks:{color:'#555',font:{family:'Poppins',size:11}}, grid:{color:'#f0f0f0'} },
+        y: { min:0, max:100, ticks:{color:'#888',font:{family:'Poppins',size:11}}, grid:{color:'#f0f0f0'} }
+      },
+      plugins: { legend: { labels: { color:'#333', font:{family:'Poppins',size:11} } } }
+    }
+  });
+}
+
+/* ─── EVOLUTION ─────────────────────────────── */
+async function runEvolution() {
+  const btn = document.getElementById('evo-run-btn');
+  const status = document.getElementById('evo-status');
+  const resultSection = document.getElementById('evo-result-section');
+  const resultCards = document.getElementById('evo-result-cards');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Running evolution agent...';
+  status.textContent = 'Querying DB for failed categories...';
+  resultSection.style.display = 'none';
+
+  try {
+    const res = await fetch('/benchmark/evolution/generate');
+    const data = await res.json();
+
+    if (data.message) {
+      status.innerHTML = '✅ ' + data.message;
+    } else {
+      status.innerHTML = `✅ Done — ${data.total_new_questions ?? 0} new questions added across ${Object.keys(data.categories_evolved || {}).length} categories`;
+
+      if (data.categories_evolved) {
+        resultSection.style.display = 'block';
+        resultCards.innerHTML = Object.entries(data.categories_evolved).map(([cat, info]) => `
+          <div style="border:2px solid #0a0a0a;border-radius:12px;padding:20px;">
+            <div style="font-size:11px;color:#888;font-weight:600;letter-spacing:1px;margin-bottom:6px;">CATEGORY</div>
+            <div style="font-size:18px;font-weight:800;margin-bottom:12px;text-transform:capitalize;">${cat}</div>
+            <div style="font-size:13px;color:#555;">Failed tasks: <strong>${info.failed_tasks}</strong></div>
+            <div style="font-size:13px;color:#10b981;font-weight:600;">+ ${info.new_questions_added} new questions</div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch(e) {
+    status.innerHTML = '❌ Evolution error: ' + e.message;
+  }
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Run Evolution Agent';
+}
+
+/* ─── Init ─────────────────────────────── */
+loadHomeData();
+</script>
+</body>
+</html>
